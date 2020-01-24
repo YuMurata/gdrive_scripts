@@ -1,5 +1,15 @@
-IMAGE_SHAPE = IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNEL = 224, 224, 3
-IMAGE_SIZE = IMAGE_WIDTH, IMAGE_HEIGHT
+from pathlib import Path
 
-image_path_dict = {'salad': r'Image/salad.jpg',
-                   'katsudon': r'Image/katsudon.jpg'}
+
+class ImageInfo:
+    shape = width, height, channel = 224, 224, 3
+    size = width, height
+
+
+class ImagePath:
+    image_path_dict = {'salad': r'Image/salad.jpg',
+                       'katsudon': r'Image/katsudon.jpg'}
+
+
+class DirectoryPath:
+    weight = Path('weight')

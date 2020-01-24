@@ -1,9 +1,13 @@
 from argparse import ArgumentParser
-from TrainDataMaker import Evaluator, Player, make_tfrecords
-from ImageEnhancer import enhance_name_list, ResizableEnhancer
+from submodule \
+    import (Evaluator, Player, make_tfrecords, DistanceMeasurer,
+            DataGenerator, RandomParamGenerator)
+from ImageEnhancer \
+    import (enhance_name_list, ResizableEnhancer, generate_random_param)
 import json
 import config
 from pathlib import Path
+import numpy as np
 
 
 def _get_args():
@@ -22,8 +26,23 @@ def _get_args():
     return args
 
 
-def _param_diff(param, target_param):
-    return -sum([abs(param[enhance_name]-target_param[enhance_name]) for enhance_name in enhance_name_list])
+class ParamDistance(DistanceMeasurer):
+    def measure(paramA: dict, paramB: dict):
+        return -sum([abs(paramA[enhance_name]-paramB[enhance_name])
+                     for enhance_name in enhance_name_list])
+
+
+class EnhanceGenerator(DataGenerator):
+    def __init__(self, image_path: str):
+        self.enhancer = ResizableEnhancer(image_path, config.IMAGE_SIZE)
+
+    def generate(self, param):
+        return np.array(self.enhancer.resized_enhance(param))
+
+
+class EnhanceParamGenerator(RandomParamGenerator):
+    def generate(self):
+        return generate_random_param()
 
 
 if __name__ == "__main__":
@@ -36,13 +55,13 @@ if __name__ == "__main__":
         scored_player_list = [Player(x['param'], x['score'])
                               for x in scored_json]
 
-        evaluator = Evaluator(scored_player_list, _param_diff)
+        evaluator = Evaluator(scored_player_list, ParamDistance())
 
         if args.image_name not in config.image_path_dict:
             raise FileNotFoundError('invalid image name')
 
         image_path = config.image_path_dict[args.image_name]
-        enhancer = ResizableEnhancer(image_path, config.IMAGE_SIZE)
+        enhancer = EnhanceGenerator(image_path)
 
         save_dir_path = Path(args.save_dir_path)
         save_dir_path.mkdir(parents=True, exist_ok=True)

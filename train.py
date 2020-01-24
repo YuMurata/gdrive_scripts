@@ -1,8 +1,9 @@
-import Model
+from submodule import ImageRankNet
 from argparse import ArgumentParser
-
 from datetime import datetime
 from pathlib import Path
+import config
+import tensorflow as tf
 
 TRAIN = 'train'
 VALIDATION = 'validation'
@@ -10,10 +11,6 @@ TEST = 'test'
 
 DATASET_TYPE_LIST = [TRAIN, VALIDATION, TEST]
 SUFFIX = '.tfrecords'
-
-
-class TrainModelException(Model.ModelException):
-    pass
 
 
 def _make_summary_dir(summary_dir_path: str):
@@ -46,6 +43,7 @@ def _get_args():
     parser = ArgumentParser()
 
     parser.add_argument('-d', '--dataset_dir_path', required=True)
+    parser.add_argument('-u', '--user_name', required=True)
     parser.add_argument('-s', '--summary_dir_path', required=True)
     parser.add_argument('-sh', '--image_shape', nargs=3,
                         required=True, type=int)
@@ -63,12 +61,10 @@ def _get_args():
 
 
 if __name__ == "__main__":
-    def get_summary_dir_path_func():
-        return _make_summary_dir(args.summary_dir_path)
-
     args = _get_args()
 
-    trainable_model = Model.RankNet(args.image_shape, use_vgg16=args.use_vgg16)
+    trainable_model = ImageRankNet.RankNet(args.image_shape,
+                                           use_vgg16=args.use_vgg16)
     if args.load_file_path is not None:
         load_file_path = Path(args.load_file_path)
         if load_file_path.exists() and load_file_path.is_file():
@@ -76,12 +72,26 @@ if __name__ == "__main__":
 
     dataset_path_dict = _make_dataset_path_dict(args.dataset_dir_path)
 
-    try:
-        dataset = {key: Model.make_dataset(dataset_path_dict[key], args.batch_size, key, args.image_shape)
-                   for key in [TRAIN, VALIDATION]}
-    except Model.DatasetException as e:
-        raise TrainModelException(e)
+    dataset = {key: ImageRankNet.dataset.make_dataset(dataset_path_dict[key],
+                                                      args.batch_size, key,
+                                                      args.image_shape)
+               for key in [TRAIN, VALIDATION]}
 
-    summary_dir_path = get_summary_dir_path_func()
-    trainable_model.train(dataset[TRAIN], log_dir_path=summary_dir_path,
-                          valid_dataset=dataset[VALIDATION], epochs=args.epochs, steps_per_epoch=30)
+    weight_dir_path = config.DirectoryPath.weight/args.user_name
+    weight_dir_path.mkdir(exist_ok=True, parents=True)
+
+    log_dir_path = weight_dir_path/'logs'
+    log_dir_path.mkdir(exist_ok=True, parents=True)
+
+    callback_list = [
+        tf.keras.callbacks.ModelCheckpoint(str(weight_dir_path/'weight.h5'),
+                                           monitor='val_loss',
+                                           verbose=0, save_best_only=True,
+                                           save_weights_only=True, mode='auto', period=1),
+        tf.keras.callbacks.TensorBoard(
+            log_dir=str(log_dir_path), write_graph=True)
+    ]
+
+    trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
+                          callback_list=callback_list, epochs=args.epochs,
+                          steps_per_epoch=30)

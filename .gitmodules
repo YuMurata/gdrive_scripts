@@ -1,0 +1,6 @@
+[submodule "ImageRankNet"]
+	path = submodule/ImageRankNet
+	url = https://github.com/YuMurata/ImageRankNet.git
+[submodule "TrainDataMaker"]
+	path = submodule/TrainDataMaker
+	url = https://github.com/YuMurata/TrainDataMaker.git
