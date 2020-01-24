@@ -47,7 +47,7 @@ def _get_args():
     parser.add_argument('-i', '--image_name', required=True)
     parser.add_argument('-sh', '--image_shape', nargs=3,
                         required=True, type=int)
-    parser.add_argument('-l', '--load_file_path')
+    parser.add_argument('-l', '--is_load', type=bool, action='store_true')
     parser.add_argument('-vgg', '--use_vgg16', action='store_true')
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--batch_size', type=int, default=100)
@@ -113,8 +113,8 @@ if __name__ == "__main__":
 
     load_file_path = \
         config.DirectoryPath.weight/args.user_name/f'{args.image_name}.h5'
-    if load_file_path.exists() and load_file_path.is_file():
-        trainable_model.load(args.load_file_path)
+    if args.is_load and load_file_path.exists() and load_file_path.is_file():
+        trainable_model.load(str(load_file_path))
 
     dataset_path_dict = _make_dataset_path_dict(args.dataset_dir_path)
 
