@@ -5,7 +5,9 @@ class ImageInfo:
     shape = width, height, channel = 224, 224, 3
     size = width, height
 
-gdrive_path =  Path(r'/content/drive/My Drive')
+
+gdrive_path = Path(r'/content/drive/My Drive')
+
 
 class ImagePath:
     image_dir_path = gdrive_path/'Image'
