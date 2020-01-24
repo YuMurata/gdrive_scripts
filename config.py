@@ -7,8 +7,8 @@ class ImageInfo:
 
 
 class ImagePath:
-    image_path_dict = {'salad': r'Image/salad.jpg',
-                       'katsudon': r'Image/katsudon.jpg'}
+    image_path_dict = {'salad': r'/content/drive/My Drive/Image/salad.jpg',
+                       'katsudon': r'/content/drive/My Drive/Image/katsudon.jpg'}
 
 
 class DirectoryPath:
