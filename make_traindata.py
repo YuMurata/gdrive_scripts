@@ -1,7 +1,5 @@
 from argparse import ArgumentParser
-from submodule \
-    import (Evaluator, Player, make_tfrecords, DistanceMeasurer,
-            DataGenerator, RandomParamGenerator)
+from submodule import TrainDataMaker
 from ImageEnhancer \
     import (enhance_name_list, ResizableEnhancer, generate_random_param)
 import json
@@ -26,13 +24,13 @@ def _get_args():
     return args
 
 
-class ParamDistance(DistanceMeasurer):
+class ParamDistance(TrainDataMaker.DistanceMeasurer):
     def measure(paramA: dict, paramB: dict):
         return -sum([abs(paramA[enhance_name]-paramB[enhance_name])
                      for enhance_name in enhance_name_list])
 
 
-class EnhanceGenerator(DataGenerator):
+class EnhanceGenerator(TrainDataMaker.DataGenerator):
     def __init__(self, image_path: str):
         self.enhancer = ResizableEnhancer(image_path, config.IMAGE_SIZE)
 
@@ -40,7 +38,7 @@ class EnhanceGenerator(DataGenerator):
         return np.array(self.enhancer.resized_enhance(param))
 
 
-class EnhanceParamGenerator(RandomParamGenerator):
+class EnhanceParamGenerator(TrainDataMaker.RandomParamGenerator):
     def generate(self):
         return generate_random_param()
 
@@ -52,10 +50,10 @@ if __name__ == "__main__":
         with open(args.scored_json_path, 'r') as fp:
             scored_json = json.load(fp)
 
-        scored_player_list = [Player(x['param'], x['score'])
+        scored_player_list = [TrainDataMaker.Player(x['param'], x['score'])
                               for x in scored_json]
 
-        evaluator = Evaluator(scored_player_list, ParamDistance())
+        evaluator = TrainDataMaker.Evaluator(scored_player_list, ParamDistance())
 
         if args.image_name not in config.image_path_dict:
             raise FileNotFoundError('invalid image name')
@@ -66,10 +64,10 @@ if __name__ == "__main__":
         save_dir_path = Path(args.save_dir_path)
         save_dir_path.mkdir(parents=True, exist_ok=True)
 
-        make_tfrecords(str(save_dir_path/'train.tfrecords'),
+        TrainDataMaker.make_tfrecords(str(save_dir_path/'train.tfrecords'),
                        args.generate_num, enhancer, evaluator)
 
-        make_tfrecords(str(save_dir_path/'validation.tfrecords'),
+        TrainDataMaker.make_tfrecords(str(save_dir_path/'validation.tfrecords'),
                        args.generate_num//10, enhancer, evaluator)
     except FileNotFoundError as e:
         print(e)
