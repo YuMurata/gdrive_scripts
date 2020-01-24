@@ -53,9 +53,10 @@ if __name__ == "__main__":
         scored_player_list = [TrainDataMaker.Player(x['param'], x['score'])
                               for x in scored_json]
 
-        evaluator = TrainDataMaker.Evaluator(scored_player_list, ParamDistance())
+        evaluator = TrainDataMaker.Evaluator(
+            scored_player_list, ParamDistance())
 
-        if args.image_name not in config.image_path_dict:
+        if args.image_name not in config.ImagePath.image_path_dict:
             raise FileNotFoundError('invalid image name')
 
         image_path = config.image_path_dict[args.image_name]
@@ -65,9 +66,10 @@ if __name__ == "__main__":
         save_dir_path.mkdir(parents=True, exist_ok=True)
 
         TrainDataMaker.make_tfrecords(str(save_dir_path/'train.tfrecords'),
-                       args.generate_num, enhancer, evaluator)
+                                      args.generate_num, enhancer, evaluator)
 
-        TrainDataMaker.make_tfrecords(str(save_dir_path/'validation.tfrecords'),
-                       args.generate_num//10, enhancer, evaluator)
+        TrainDataMaker.make_tfrecords(
+            str(save_dir_path/'validation.tfrecords'),
+                                      args.generate_num//10, enhancer, evaluator)
     except FileNotFoundError as e:
         print(e)
