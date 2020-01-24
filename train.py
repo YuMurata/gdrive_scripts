@@ -59,6 +59,50 @@ def _get_args():
 
     return args
 
+class ImageMapper(ImageRankNet.dataset.Mapper):
+    def map_example(self, example_proto):
+        features = {
+            'label': tf.io.FixedLenFeature((), tf.int64,
+                                           default_value=0),
+            'left_image': tf.io.FixedLenFeature((), tf.string,
+                                                default_value=""),
+            'right_image': tf.io.FixedLenFeature((), tf.string,
+                                                 default_value=""),
+        }
+
+        parsed_features = tf.io.parse_single_example(example_proto, features)
+
+        left_image_raw = \
+            tf.io.decode_raw(parsed_features['left_image'], tf.uint8)
+        right_image_raw =\
+            tf.io.decode_raw(parsed_features['right_image'], tf.uint8)
+
+        label = tf.cast(parsed_features['label'], tf.int32, name='label')
+
+        float_left_image_raw = tf.cast(left_image_raw, tf.float32)/255
+        float_right_image_raw = tf.cast(right_image_raw, tf.float32)/255
+
+        image_shape = config.ImageInfo.shape
+
+        def _augmentation(image):
+            width, height, channel = image_shape
+
+            x = tf.image.random_flip_left_right(image)
+            x = tf.image.random_crop(
+                x, [int(width*0.8), int(height*0.8), channel])
+            x = tf.image.resize(x, (width, height))
+            return x
+
+        left_image = \
+            tf.reshape(float_left_image_raw, image_shape, name='left_image')
+        left_image = _augmentation(left_image)
+
+        right_image = \
+            tf.reshape(float_right_image_raw, image_shape, name='right_image')
+        right_image = _augmentation(right_image)
+
+        return ((left_image, right_image), label)
+
 
 if __name__ == "__main__":
     args = _get_args()
@@ -66,13 +110,15 @@ if __name__ == "__main__":
     trainable_model = ImageRankNet.RankNet(args.image_shape,
                                            use_vgg16=args.use_vgg16)
 
-    load_file_path = config.DirectoryPath.weight/args.user_name/f'{args.image_name}.h5'
+    load_file_path = \
+        config.DirectoryPath.weight/args.user_name/f'{args.image_name}.h5'
     if load_file_path.exists() and load_file_path.is_file():
         trainable_model.load(args.load_file_path)
 
     dataset_path_dict = _make_dataset_path_dict(args.dataset_dir_path)
 
     dataset = {key: ImageRankNet.dataset.make_dataset(dataset_path_dict[key],
+                                                      ImageMapper(),
                                                       args.batch_size, key,
                                                       args.image_shape)
                for key in [TRAIN, VALIDATION]}
