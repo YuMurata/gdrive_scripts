@@ -65,10 +65,10 @@ if __name__ == "__main__":
 
     trainable_model = ImageRankNet.RankNet(args.image_shape,
                                            use_vgg16=args.use_vgg16)
-    if args.load_file_path is not None:
-        load_file_path = Path(args.load_file_path)
-        if load_file_path.exists() and load_file_path.is_file():
-            trainable_model.load(args.load_file_path)
+
+    load_file_path = config.DirectoryPath.weight/args.user_name/'weight.h5'
+    if load_file_path.exists() and load_file_path.is_file():
+        trainable_model.load(args.load_file_path)
 
     dataset_path_dict = _make_dataset_path_dict(args.dataset_dir_path)
 
