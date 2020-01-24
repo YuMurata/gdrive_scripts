@@ -119,8 +119,8 @@ if __name__ == "__main__":
 
     dataset = {key: ImageRankNet.dataset.make_dataset(dataset_path_dict[key],
                                                       ImageMapper(),
-                                                      args.batch_size, key,
-                                                      args.image_shape)
+                                                      args.batch_size, key
+                                                      )
                for key in [TRAIN, VALIDATION]}
 
     weight_dir_path = config.DirectoryPath.weight/args.user_name
