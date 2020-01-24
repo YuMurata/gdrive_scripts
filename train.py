@@ -130,7 +130,7 @@ if __name__ == "__main__":
     log_dir_path.mkdir(exist_ok=True, parents=True)
 
     callback_list = [
-        tf.keras.callbacks.ModelCheckpoint(str(weight_dir_path/'weight.h5'),
+        tf.keras.callbacks.ModelCheckpoint(str(weight_dir_path/f'{args.image_name}.h5'),
                                            monitor='val_loss',
                                            verbose=0, save_best_only=True,
                                            save_weights_only=True, mode='auto',
