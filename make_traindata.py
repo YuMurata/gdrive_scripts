@@ -32,7 +32,7 @@ class ParamDistance(TrainDataMaker.DistanceMeasurer):
 
 class EnhanceGenerator(TrainDataMaker.DataGenerator):
     def __init__(self, image_path: str):
-        self.enhancer = ResizableEnhancer(image_path, config.IMAGE_SIZE)
+        self.enhancer = ResizableEnhancer(image_path, config.ImageInfo.size)
 
     def generate(self, param):
         return np.array(self.enhancer.resized_enhance(param))
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         if args.image_name not in config.ImagePath.image_path_dict:
             raise FileNotFoundError('invalid image name')
 
-        image_path = config.image_path_dict[args.image_name]
+        image_path = config.ImagePath.image_path_dict[args.image_name]
         enhancer = EnhanceGenerator(image_path)
 
         save_dir_path = Path(args.save_dir_path)
@@ -70,6 +70,6 @@ if __name__ == "__main__":
 
         TrainDataMaker.make_tfrecords(
             str(save_dir_path/'validation.tfrecords'),
-                                      args.generate_num//10, enhancer, evaluator)
+            args.generate_num//10, enhancer, evaluator)
     except FileNotFoundError as e:
         print(e)
