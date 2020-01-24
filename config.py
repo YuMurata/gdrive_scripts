@@ -7,8 +7,9 @@ class ImageInfo:
 
 
 class ImagePath:
-    image_path_dict = {'salad': r'/content/drive/My Drive/Image/salad.jpg',
-                       'katsudon': r'/content/drive/My Drive/Image/katsudon.jpg'}
+    image_dir_path = Path(r'/content/drive/My Drive/Image')
+    image_path_dict = {'salad': str(image_dir_path/'salad.jpg'),
+                       'katsudon': str(image_dir_path/'katsudon.jpg')}
 
 
 class DirectoryPath:
