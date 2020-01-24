@@ -44,7 +44,7 @@ def _get_args():
 
     parser.add_argument('-d', '--dataset_dir_path', required=True)
     parser.add_argument('-u', '--user_name', required=True)
-    parser.add_argument('-s', '--summary_dir_path', required=True)
+    parser.add_argument('-i', '--image_name', required=True)
     parser.add_argument('-sh', '--image_shape', nargs=3,
                         required=True, type=int)
     parser.add_argument('-l', '--load_file_path')
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     trainable_model = ImageRankNet.RankNet(args.image_shape,
                                            use_vgg16=args.use_vgg16)
 
-    load_file_path = config.DirectoryPath.weight/args.user_name/'weight.h5'
+    load_file_path = config.DirectoryPath.weight/args.user_name/f'{args.image_name}.h5'
     if load_file_path.exists() and load_file_path.is_file():
         trainable_model.load(args.load_file_path)
 
