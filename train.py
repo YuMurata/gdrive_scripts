@@ -47,7 +47,7 @@ def _get_args():
     parser.add_argument('-i', '--image_name', required=True)
     parser.add_argument('-sh', '--image_shape', nargs=3,
                         required=True, type=int)
-    parser.add_argument('-l', '--is_load', type=bool, action='store_true')
+    parser.add_argument('-l', '--is_load', action='store_true')
     parser.add_argument('-vgg', '--use_vgg16', action='store_true')
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--batch_size', type=int, default=100)
