@@ -65,11 +65,13 @@ if __name__ == "__main__":
         save_dir_path = Path(args.save_dir_path)
         save_dir_path.mkdir(parents=True, exist_ok=True)
 
-        TrainDataMaker.make_tfrecords(str(save_dir_path/'train.tfrecords'), EnhanceParamGenerator(),
-                                      args.generate_num, enhancer, evaluator)
+        TrainDataMaker.make_tfrecords(str(save_dir_path/'train.tfrecords'),
+                                      args.generate_num, EnhanceParamGenerator(),
+                                      enhancer, evaluator)
 
         TrainDataMaker.make_tfrecords(
-            str(save_dir_path/'validation.tfrecords'), EnhanceParamGenerator(),
-            args.generate_num//10, enhancer, evaluator)
+            str(save_dir_path/'validation.tfrecords'),
+            args.generate_num//10, EnhanceParamGenerator(),
+            enhancer, evaluator)
     except FileNotFoundError as e:
         print(e)
