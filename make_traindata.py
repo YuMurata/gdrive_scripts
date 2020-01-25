@@ -11,10 +11,9 @@ import numpy as np
 def _get_args():
     parser = ArgumentParser()
 
-    parser.add_argument('-j', '--scored_json_path', required=True)
-    parser.add_argument('-s', '--save_dir_path', required=True)
     parser.add_argument('-n', '--generate_num', required=True, type=int)
     parser.add_argument('-i', '--image_name', required=True)
+    parser.add_argument('-u', '--user_name', required=True)
 
     args = parser.parse_args()
 
@@ -47,11 +46,15 @@ if __name__ == "__main__":
     args = _get_args()
 
     try:
-        with open(args.scored_json_path, 'r') as fp:
-            scored_json = json.load(fp)
+        scored_param_path = \
+            config.DirectoryPath.scored_param / \
+            args.user_name / f'{args.image_name}.json'
+
+        with open(scored_param_path, 'r') as fp:
+            scored_param = json.load(fp)
 
         scored_player_list = [TrainDataMaker.Player(x['param'], x['score'])
-                              for x in scored_json]
+                              for x in scored_param]
 
         evaluator = TrainDataMaker.Evaluator(
             scored_player_list, ParamDistance())
@@ -62,17 +65,18 @@ if __name__ == "__main__":
         image_path = config.ImagePath.image_path_dict[args.image_name]
         enhancer = EnhanceGenerator(image_path)
 
-        save_dir_path = Path(args.save_dir_path)
-        save_dir_path.mkdir(parents=True, exist_ok=True)
+        tfrecords_dir_path = config.DirectoryPath.tfrecords / \
+            args.user_name / args.image_name
+        tfrecords_dir_path.mkdir(parents=True, exist_ok=True)
 
         TrainDataMaker.make_tfrecords(
-            str(save_dir_path / 'train.tfrecords'),
+            str(tfrecords_dir_path / 'train.tfrecords'),
             args.generate_num,
             EnhanceParamGenerator(),
             enhancer, evaluator)
 
         TrainDataMaker.make_tfrecords(
-            str(save_dir_path / 'validation.tfrecords'),
+            str(tfrecords_dir_path / 'validation.tfrecords'),
             args.generate_num // 10, EnhanceParamGenerator(),
             enhancer, evaluator)
     except FileNotFoundError as e:

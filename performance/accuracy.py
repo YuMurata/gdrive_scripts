@@ -5,6 +5,7 @@ sys.path.append(str(Path(__file__).parents[1]))
 import json
 import config
 from make_traindata import ParamDistance
+from train import MyCNN
 from submodule import ImageRankNet, TrainDataMaker
 from argparse import ArgumentParser
 from ImageEnhancer import generate_random_param, ResizableEnhancer
@@ -30,7 +31,7 @@ def _get_args():
 if __name__ == "__main__":
     args = _get_args()
 
-    ranknet = ImageRankNet.RankNet(config.ImageInfo.shape)
+    ranknet = ImageRankNet.RankNet(MyCNN())
     weight_path = str(config.DirectoryPath.weight /
                       args.user_name / f'{args.image_category_name}.h5')
 

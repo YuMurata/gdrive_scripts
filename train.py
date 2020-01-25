@@ -43,13 +43,10 @@ def _make_dataset_path_dict(dataset_dir_path: str):
 def _get_args():
     parser = ArgumentParser()
 
-    parser.add_argument('-d', '--dataset_dir_path', required=True)
     parser.add_argument('-u', '--user_name', required=True)
     parser.add_argument('-i', '--image_name', required=True)
-    parser.add_argument('-sh', '--image_shape', nargs=3,
-                        required=True, type=int)
+
     parser.add_argument('-l', '--is_load', action='store_true')
-    parser.add_argument('-vgg', '--use_vgg16', action='store_true')
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--batch_size', type=int, default=100)
 
@@ -135,7 +132,8 @@ if __name__ == "__main__":
     if args.is_load and load_file_path.exists() and load_file_path.is_file():
         trainable_model.load(str(load_file_path))
 
-    dataset_path_dict = _make_dataset_path_dict(args.dataset_dir_path)
+    dataset_path_dict = _make_dataset_path_dict(
+        str(config.DirectoryPath.tfrecords / args.user_name / args.image_name))
 
     dataset = {key: ImageRankNet.dataset.make_dataset(dataset_path_dict[key],
                                                       ImageMapper(),
