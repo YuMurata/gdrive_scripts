@@ -1,21 +1,21 @@
-from ImageEnhancer import generate_random_param, ResizableEnhancer
-from argparse import ArgumentParser
-from submodule import ImageRankNet, TrainDataMaker
-from make_traindata import ParamDistance
-import config
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parents[1]))
+
 import json
+import config
+from make_traindata import ParamDistance
+from submodule import ImageRankNet, TrainDataMaker
+from argparse import ArgumentParser
+from ImageEnhancer import generate_random_param, ResizableEnhancer
 
 
 def _get_args():
     parser = ArgumentParser()
 
-    parser.add_argument('-s', '--scored_param_path', required=True)
     parser.add_argument('-u', '--user_name', required=True)
     parser.add_argument('-i', '--image_category_name', required=True)
     parser.add_argument('-n', '--iteration_num', type=int, default=1000)
-    parser.add_argument('-vgg', '--use_vgg16', action='store_true')
-    parser.add_argument('--epochs', type=int, default=20)
-    parser.add_argument('--batch_size', type=int, default=100)
 
     args = parser.parse_args()
 
