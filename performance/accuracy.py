@@ -9,6 +9,7 @@ from submodule import ImageRankNet, TrainDataMaker
 from argparse import ArgumentParser
 from ImageEnhancer import generate_random_param, ResizableEnhancer
 from tqdm import tqdm
+from collections import OrderedDict
 
 
 def _get_args():
@@ -31,12 +32,13 @@ if __name__ == "__main__":
 
     ranknet = ImageRankNet.RankNet(config.ImageInfo.shape)
     weight_path = str(config.DirectoryPath.weight /
-                      args.user_name/f'{args.image_category_name}.h5')
+                      args.user_name / f'{args.image_category_name}.h5')
 
     ranknet.load(weight_path)
 
     scored_param_path = str(
-        config.DirectoryPath.scored_param/args.user_name/f'{args.image_category_name}.json')
+        config.DirectoryPath.scored_param / args.user_name /
+        f'{args.image_category_name}.json')
     with open(scored_param_path, 'r') as fp:
         scored_param = json.load(fp)
 
@@ -51,30 +53,34 @@ if __name__ == "__main__":
 
     miss_predict_num = 0
 
-    for _ in tqdm(range(args.iteration_num), desc='evaluate'):
-        left_param = generate_random_param()
-        right_param = generate_random_param()
+    with tqdm(range(args.iteration_num), desc='evaluate') as pbar:
+        for _ in pbar:
+            error = miss_predict_num / args.iteration_num
+            pbar.set_postfix(OrderedDict(error=error, miss=miss_predict_num))
 
-        left_image = enhancer.resized_enhance(left_param)
-        right_image = enhancer.resized_enhance(right_param)
+            left_param = generate_random_param()
+            right_param = generate_random_param()
 
-        left_score = evaluator.evaluate(left_param)
-        right_score = evaluator.evaluate(right_param)
+            left_image = enhancer.resized_enhance(left_param)
+            right_image = enhancer.resized_enhance(right_param)
 
-        predict = ranknet.predict([left_image, right_image])
-        left_predict = predict[0][0]
-        right_predict = predict[1][0]
+            left_score = evaluator.evaluate(left_param)
+            right_score = evaluator.evaluate(right_param)
 
-        if left_score > right_score:
-            if not left_predict > right_predict:
-                miss_predict_num += 1
+            predict = ranknet.predict([left_image, right_image])
+            left_predict = predict[0][0]
+            right_predict = predict[1][0]
 
-        if left_score < right_score:
-            if not left_predict < right_predict:
-                miss_predict_num += 1
+            if left_score > right_score:
+                if not left_predict > right_predict:
+                    miss_predict_num += 1
 
-        if left_score == right_score:
-            if not left_predict == right_predict:
-                miss_predict_num += 1
+            if left_score < right_score:
+                if not left_predict < right_predict:
+                    miss_predict_num += 1
+
+            if left_score == right_score:
+                if not left_predict == right_predict:
+                    miss_predict_num += 1
 
     print(f'error: {miss_predict_num/args.iteration_num}')
