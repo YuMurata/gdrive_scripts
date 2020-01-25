@@ -26,8 +26,8 @@ def _get_args():
 
 class ParamDistance(TrainDataMaker.DistanceMeasurer):
     def measure(self, paramA: dict, paramB: dict):
-        return sum([abs(paramA[enhance_name]-paramB[enhance_name])
-                     for enhance_name in enhance_name_list])
+        return sum([abs(paramA[enhance_name] - paramB[enhance_name])
+                    for enhance_name in enhance_name_list])
 
 
 class EnhanceGenerator(TrainDataMaker.DataGenerator):
@@ -66,14 +66,14 @@ if __name__ == "__main__":
         save_dir_path.mkdir(parents=True, exist_ok=True)
 
         TrainDataMaker.make_tfrecords(
-            str(save_dir_path/'train.tfrecords'),
+            str(save_dir_path / 'train.tfrecords'),
             args.generate_num,
             EnhanceParamGenerator(),
             enhancer, evaluator)
 
         TrainDataMaker.make_tfrecords(
-            str(save_dir_path/'validation.tfrecords'),
-            args.generate_num//10, EnhanceParamGenerator(),
+            str(save_dir_path / 'validation.tfrecords'),
+            args.generate_num // 10, EnhanceParamGenerator(),
             enhancer, evaluator)
     except FileNotFoundError as e:
         print(e)

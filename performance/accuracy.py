@@ -39,6 +39,7 @@ if __name__ == "__main__":
     scored_param_path = str(
         config.DirectoryPath.scored_param / args.user_name /
         f'{args.image_category_name}.json')
+
     with open(scored_param_path, 'r') as fp:
         scored_param = json.load(fp)
 

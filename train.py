@@ -15,10 +15,11 @@ SUFFIX = '.tfrecords'
 
 def _make_summary_dir(summary_dir_path: str):
     now = datetime.now()
-    path = Path(summary_dir_path)/'{0:%m%d}'.format(now)/'{0:%H%M}'.format(now)
+    path = Path(summary_dir_path) / \
+        '{0:%m%d}'.format(now) / '{0:%H%M}'.format(now)
 
     if path.exists():
-        path = Path(str(path.parent)+'_{0:%S}'.format(now))
+        path = Path(str(path.parent) + '_{0:%S}'.format(now))
 
     path.mkdir(parents=True)
 
@@ -34,7 +35,7 @@ def _make_dataset_path_dict(dataset_dir_path: str):
         raise NotADirectoryError
 
     dataset_path_dict = \
-        {key: str(dataset_dir_path/(key+SUFFIX))
+        {key: str(dataset_dir_path / (key + SUFFIX))
          for key in DATASET_TYPE_LIST}
     return dataset_path_dict
 
@@ -80,8 +81,8 @@ class ImageMapper(ImageRankNet.dataset.Mapper):
 
         label = tf.cast(parsed_features['label'], tf.int32, name='label')
 
-        float_left_image_raw = tf.cast(left_image_raw, tf.float32)/255
-        float_right_image_raw = tf.cast(right_image_raw, tf.float32)/255
+        float_left_image_raw = tf.cast(left_image_raw, tf.float32) / 255
+        float_right_image_raw = tf.cast(right_image_raw, tf.float32) / 255
 
         image_shape = config.ImageInfo.shape
 
@@ -90,7 +91,7 @@ class ImageMapper(ImageRankNet.dataset.Mapper):
 
             x = tf.image.random_flip_left_right(image)
             x = tf.image.random_crop(
-                x, [int(width*0.8), int(height*0.8), channel])
+                x, [int(width * 0.8), int(height * 0.8), channel])
             x = tf.image.resize(x, (width, height))
             return x
 
@@ -105,14 +106,32 @@ class ImageMapper(ImageRankNet.dataset.Mapper):
         return ((left_image, right_image), label)
 
 
+class MyCNN(ImageRankNet.EvaluateBody):
+    def __init__(self):
+        super().__init__(config.ImageInfo.shape)
+
+    def build(self):
+        model = tf.keras.Sequential()
+
+        model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=5,
+                                         padding='same', activation='relu',
+                                         input_shape=self.image_shape))
+        model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
+
+        model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=5,
+                                         padding='same', activation='relu'))
+        model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
+
+        return model
+
+
 if __name__ == "__main__":
     args = _get_args()
 
-    trainable_model = ImageRankNet.RankNet(args.image_shape,
-                                           use_vgg16=args.use_vgg16)
+    trainable_model = ImageRankNet.RankNet(MyCNN())
 
     load_file_path = \
-        config.DirectoryPath.weight/args.user_name/f'{args.image_name}.h5'
+        config.DirectoryPath.weight / args.user_name / f'{args.image_name}.h5'
     if args.is_load and load_file_path.exists() and load_file_path.is_file():
         trainable_model.load(str(load_file_path))
 
@@ -124,15 +143,15 @@ if __name__ == "__main__":
                                                       )
                for key in [TRAIN, VALIDATION]}
 
-    weight_dir_path = config.DirectoryPath.weight/args.user_name
+    weight_dir_path = config.DirectoryPath.weight / args.user_name
     weight_dir_path.mkdir(exist_ok=True, parents=True)
 
-    log_dir_path = weight_dir_path/'logs'
+    log_dir_path = weight_dir_path / 'logs'
     log_dir_path.mkdir(exist_ok=True, parents=True)
 
     callback_list = [
         tf.keras.callbacks.ModelCheckpoint(
-            str(weight_dir_path/f'{args.image_name}.h5'),
+            str(weight_dir_path / f'{args.image_name}.h5'),
             monitor='val_loss',
             verbose=0, save_best_only=True,
             save_weights_only=True, mode='auto',
