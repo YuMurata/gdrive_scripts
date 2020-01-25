@@ -10,12 +10,13 @@ gdrive_path = Path(r'/content/drive/My Drive')
 
 
 class DirectoryPath:
-    weight = gdrive_path/'weight'
-    scored_param = gdrive_path/'scored_param'
+    weight = gdrive_path / 'weight'
+    scored_param = gdrive_path / 'scored_param'
     tfrecords = Path(r'/content/tfrecords')
-    image = gdrive_path/'Image'
+    image = gdrive_path / 'Image'
 
 
 class ImagePath:
-    image_path_dict = {image_name: str(DirectoryPath.image/f'{image_name}.jpg')
-                       for image_name in ['salad', 'katsudon', 'farm', 'flower', 'watarfall']}
+    image_path_dict = {image_name: str(DirectoryPath.image / f'{image_name}.jpg')
+                       for image_name in ['salad', 'katsudon', 'farm',
+                                          'flower', 'waterfall']}
