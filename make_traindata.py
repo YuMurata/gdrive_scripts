@@ -26,7 +26,7 @@ def _get_args():
 
 class ParamDistance(TrainDataMaker.DistanceMeasurer):
     def measure(self, paramA: dict, paramB: dict):
-        return -sum([abs(paramA[enhance_name]-paramB[enhance_name])
+        return sum([abs(paramA[enhance_name]-paramB[enhance_name])
                      for enhance_name in enhance_name_list])
 
 
