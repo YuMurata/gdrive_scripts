@@ -8,6 +8,7 @@ from make_traindata import ParamDistance
 from submodule import ImageRankNet, TrainDataMaker
 from argparse import ArgumentParser
 from ImageEnhancer import generate_random_param, ResizableEnhancer
+from tqdm import tqdm
 
 
 def _get_args():
@@ -35,7 +36,7 @@ if __name__ == "__main__":
     ranknet.load(weight_path)
 
     scored_param_path = str(
-        config.DirectoryPath.scored_param/f'{args.image_category_name}.json')
+        config.DirectoryPath.scored_param/args.user_name/f'{args.image_category_name}.json')
     with open(scored_param_path, 'r') as fp:
         scored_param = json.load(fp)
 
@@ -50,7 +51,7 @@ if __name__ == "__main__":
 
     miss_predict_num = 0
 
-    for _ in range(args.iteration_num):
+    for _ in tqdm(range(args.iteration_num), desc='evaluate'):
         left_param = generate_random_param()
         right_param = generate_random_param()
 
