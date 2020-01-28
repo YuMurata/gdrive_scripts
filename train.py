@@ -46,7 +46,8 @@ def _get_args():
     parser.add_argument('-u', '--user_name', required=True)
     parser.add_argument('-i', '--image_name', required=True)
 
-    parser.add_argument('-l', '--load_weight_path')
+    parser.add_argument('-l', '--load_weight_path', default='')
+    parser.add_argument('--xception', action='store_true')
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--batch_size', type=int, default=100)
 
@@ -122,12 +123,26 @@ class MyCNN(ImageRankNet.EvaluateBody):
         return model
 
 
+class Xception(ImageRankNet.EvaluateBody):
+    def __init__(self):
+        super().__init__(config.ImageInfo.shape)
+
+    def build(self):
+        model = \
+            tf.keras.applications.xception.Xception(
+                include_top=False,
+                weights='imagenet',
+                input_shape=self.image_shape)
+        return model
+
+
 if __name__ == "__main__":
     args = _get_args()
 
-    trainable_model = ImageRankNet.RankNet(MyCNN())
+    trainable_model = ImageRankNet.RankNet(
+        Xception() if args.xception else MyCNN())
 
-    if args.load_weight_path is not None:
+    if args.load_weight_path:
         trainable_model.load(args.load_weight_path)
 
     dataset_path_dict = _make_dataset_path_dict(
