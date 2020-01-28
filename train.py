@@ -171,6 +171,8 @@ if __name__ == "__main__":
 
     colab_tpu_addr = os.getenv('COLAB_TPU_ADDR')
     if colab_tpu_addr:
+        print('use TPU')
+
         tpu_grpc_url = "grpc://" + os.environ["COLAB_TPU_ADDR"]
         tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(
             tpu_grpc_url)
@@ -181,12 +183,12 @@ if __name__ == "__main__":
             trainable_model = ImageRankNet.RankNet(
                 Xception() if args.xception else MyCNN())
 
-        if args.load_weight_path:
-            trainable_model.load(args.load_weight_path)
+            if args.load_weight_path:
+                trainable_model.load(args.load_weight_path)
 
-        trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
-                              callback_list=callback_list, epochs=args.epochs,
-                              steps_per_epoch=30)
+            trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
+                                  callback_list=callback_list, epochs=args.epochs,
+                                  steps_per_epoch=30)
     else:
         trainable_model = ImageRankNet.RankNet(
             Xception() if args.xception else MyCNN())
