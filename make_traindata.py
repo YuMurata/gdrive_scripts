@@ -79,7 +79,7 @@ if __name__ == "__main__":
         else:
             print(f'{str(train_path)} is already exist')
 
-        valid_path = tfrecords_dir_path / 'train.tfrecords'
+        valid_path = tfrecords_dir_path / 'validation.tfrecords'
         if not valid_path.exists():
             TrainDataMaker.make_tfrecords(
                 str(valid_path),
