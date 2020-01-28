@@ -69,15 +69,24 @@ if __name__ == "__main__":
             args.user_name / args.image_name
         tfrecords_dir_path.mkdir(parents=True, exist_ok=True)
 
-        TrainDataMaker.make_tfrecords(
-            str(tfrecords_dir_path / 'train.tfrecords'),
-            args.generate_num,
-            EnhanceParamGenerator(),
-            enhancer, evaluator)
+        train_path = tfrecords_dir_path / 'train.tfrecords'
+        if not train_path.exists():
+            TrainDataMaker.make_tfrecords(
+                str(train_path),
+                args.generate_num,
+                EnhanceParamGenerator(),
+                enhancer, evaluator)
+        else:
+            print(f'{str(train_path)} is already exist')
 
-        TrainDataMaker.make_tfrecords(
-            str(tfrecords_dir_path / 'validation.tfrecords'),
-            args.generate_num // 10, EnhanceParamGenerator(),
-            enhancer, evaluator)
+        valid_path = tfrecords_dir_path / 'train.tfrecords'
+        if not valid_path.exists():
+            TrainDataMaker.make_tfrecords(
+                str(valid_path),
+                args.generate_num // 10, EnhanceParamGenerator(),
+                enhancer, evaluator)
+        else:
+            print(f'{str(valid_path)} is already exist')
+
     except FileNotFoundError as e:
         print(e)
