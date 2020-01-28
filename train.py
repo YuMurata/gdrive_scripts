@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 import config
 import tensorflow as tf
+import os
 
 TRAIN = 'train'
 VALIDATION = 'validation'
@@ -139,12 +140,6 @@ class Xception(ImageRankNet.EvaluateBody):
 if __name__ == "__main__":
     args = _get_args()
 
-    trainable_model = ImageRankNet.RankNet(
-        Xception() if args.xception else MyCNN())
-
-    if args.load_weight_path:
-        trainable_model.load(args.load_weight_path)
-
     dataset_path_dict = _make_dataset_path_dict(
         str(config.DirectoryPath.tfrecords / args.user_name / args.image_name))
 
@@ -174,6 +169,31 @@ if __name__ == "__main__":
             log_dir=str(log_dir_path), write_graph=True)
     ]
 
-    trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
-                          callback_list=callback_list, epochs=args.epochs,
-                          steps_per_epoch=30)
+    colab_tpu_addr = os.getenv('COLAB_TPU_ADDR')
+    if colab_tpu_addr:
+        tpu_grpc_url = "grpc://" + os.environ["COLAB_TPU_ADDR"]
+        tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(
+            tpu_grpc_url)
+        tf.contrib.distribute.initialize_tpu_system(tpu_cluster_resolver)
+        strategy = tf.contrib.distribute.TPUStrategy(
+            tpu_cluster_resolver, steps_per_run=100)
+        with strategy.scope():
+            trainable_model = ImageRankNet.RankNet(
+                Xception() if args.xception else MyCNN())
+
+        if args.load_weight_path:
+            trainable_model.load(args.load_weight_path)
+
+        trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
+                              callback_list=callback_list, epochs=args.epochs,
+                              steps_per_epoch=30)
+    else:
+        trainable_model = ImageRankNet.RankNet(
+            Xception() if args.xception else MyCNN())
+
+        if args.load_weight_path:
+            trainable_model.load(args.load_weight_path)
+
+        trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
+                              callback_list=callback_list, epochs=args.epochs,
+                              steps_per_epoch=30)
