@@ -155,6 +155,9 @@ if __name__ == "__main__":
                for key in [TRAIN, VALIDATION]}
 
     weight_dir_path = config.DirectoryPath.weight / args.user_name
+    if args.xception:
+        weight_dir_path = weight_dir_path / 'xception'
+
     weight_dir_path.mkdir(exist_ok=True, parents=True)
 
     log_dir_path = weight_dir_path / 'logs'
