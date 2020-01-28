@@ -5,6 +5,7 @@ from pathlib import Path
 import config
 import tensorflow as tf
 import os
+from evaluate_body import MyCNN, Xception
 
 TRAIN = 'train'
 VALIDATION = 'validation'
@@ -105,49 +106,20 @@ class ImageMapper(ImageRankNet.dataset.Mapper):
         return ((left_image, right_image), label)
 
 
-class MyCNN(ImageRankNet.EvaluateBody):
-    def __init__(self):
-        super().__init__(config.ImageInfo.shape)
-
-    def build(self):
-        model = tf.keras.Sequential()
-
-        model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=5,
-                                         padding='same', activation='relu',
-                                         input_shape=self.image_shape))
-        model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
-
-        model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=5,
-                                         padding='same', activation='relu'))
-        model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
-
-        return model
-
-
-class Xception(ImageRankNet.EvaluateBody):
-    def __init__(self):
-        super().__init__(config.ImageInfo.shape)
-
-    def build(self):
-        model = \
-            tf.keras.applications.xception.Xception(
-                include_top=False,
-                weights='imagenet',
-                input_shape=self.image_shape)
-        return model
-
-
 if __name__ == "__main__":
     args = _get_args()
 
-    dataset_path_dict = _make_dataset_path_dict(
-        str(config.DirectoryPath.tfrecords / args.user_name / args.image_name))
+    dataset_path_dict = \
+        _make_dataset_path_dict(
+            str(config.DirectoryPath.tfrecords / args.user_name /
+                args.image_name))
 
-    dataset = {key: ImageRankNet.dataset.make_dataset(dataset_path_dict[key],
-                                                      ImageMapper(),
-                                                      args.batch_size, key
-                                                      )
-               for key in [TRAIN, VALIDATION]}
+    dataset = \
+        {key: ImageRankNet.dataset.make_dataset(dataset_path_dict[key],
+                                                ImageMapper(),
+                                                args.batch_size, key
+                                                )
+         for key in [TRAIN, VALIDATION]}
 
     weight_dir_path = config.DirectoryPath.weight / args.user_name
     if args.xception:
@@ -169,33 +141,12 @@ if __name__ == "__main__":
             log_dir=str(log_dir_path), write_graph=True)
     ]
 
-    colab_tpu_addr = os.getenv('COLAB_TPU_ADDR')
-    if colab_tpu_addr:
-        print('use TPU')
+    trainable_model = ImageRankNet.RankNet(
+        Xception() if args.xception else MyCNN())
 
-        tpu_grpc_url = "grpc://" + os.environ["COLAB_TPU_ADDR"]
-        tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(
-            tpu_grpc_url)
-        tf.contrib.distribute.initialize_tpu_system(tpu_cluster_resolver)
-        strategy = tf.contrib.distribute.TPUStrategy(
-            tpu_cluster_resolver, steps_per_run=100)
-        with strategy.scope():
-            trainable_model = ImageRankNet.RankNet(
-                Xception() if args.xception else MyCNN())
+    if args.load_weight_path:
+        trainable_model.load(args.load_weight_path)
 
-            if args.load_weight_path:
-                trainable_model.load(args.load_weight_path)
-
-            trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
-                                  callback_list=callback_list, epochs=args.epochs,
-                                  steps_per_epoch=30)
-    else:
-        trainable_model = ImageRankNet.RankNet(
-            Xception() if args.xception else MyCNN())
-
-        if args.load_weight_path:
-            trainable_model.load(args.load_weight_path)
-
-        trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
-                              callback_list=callback_list, epochs=args.epochs,
-                              steps_per_epoch=30)
+    trainable_model.train(dataset[TRAIN], dataset[VALIDATION],
+                          callback_list=callback_list, epochs=args.epochs,
+                          steps_per_epoch=30)
