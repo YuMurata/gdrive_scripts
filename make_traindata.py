@@ -56,13 +56,17 @@ if __name__ == "__main__":
         train_path = tfrecords_dir_path / 'train.tfrecords'
         is_train_exists = train_path.exists()
         train_writer = TrainDataMaker.Writer(train_path)
+        if is_train_exists:
+            print(f'{str(train_path)} is already exist')
 
         valid_path = tfrecords_dir_path / 'validation.tfrecords'
         valid_writer = TrainDataMaker.Writer(valid_path)
         is_valid_exists = valid_path.exists()
+        if is_valid_exists:
+            print(f'{str(valid_path)} is already exist')
 
         for scored_param_path in scored_param_dir_path.iterdir():
-            with open(scored_param_path, 'r') as fp:
+            with open(str(scored_param_path), 'r') as fp:
                 scored_param = json.load(fp)
 
             scored_player_list = [TrainDataMaker.Player(x['param'], x['score'])
@@ -71,10 +75,16 @@ if __name__ == "__main__":
             evaluator = TrainDataMaker.Evaluator(
                 scored_player_list, ParamDistance())
 
-            if args.image_name not in config.ImagePath.image_path_dict:
+            image_dir_path = config.DirectoryPath.image / args.image_name
+            if not image_dir_path.exists():
                 raise FileNotFoundError('invalid image name')
 
-            image_path = config.ImagePath.image_path_dict[args.image_name]
+            image_path_candidate = \
+                [image_path for image_path in image_dir_path.iterdir()
+                 if image_path.stem == scored_param.stem]
+            if len(image_path_candidate) != 1:
+                raise Exception(f'{scored_param_path.stem} is multiple exists')
+            image_path = str(image_path_candidate[0])
             enhancer = EnhanceGenerator(image_path)
 
             if not is_train_exists:
@@ -83,16 +93,12 @@ if __name__ == "__main__":
                     args.generate_num,
                     EnhanceParamGenerator(),
                     enhancer, evaluator)
-            else:
-                print(f'{str(train_path)} is already exist')
 
             if not is_valid_exists:
                 TrainDataMaker.make_tfrecords(
                     valid_writer,
                     args.generate_num // 10, EnhanceParamGenerator(),
                     enhancer, evaluator)
-            else:
-                print(f'{str(valid_path)} is already exist')
 
     except FileNotFoundError as e:
         print(e)
