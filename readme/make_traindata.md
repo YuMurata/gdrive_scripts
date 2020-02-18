@@ -19,19 +19,21 @@
 
 ## ディレクトリ構成
 ```
-content
-├─drive
-│  └─My Drive
-│      ├─Image
-│      ├─scored_param
-│      │  └─[user]
-│      │      └─[image]
-│      └─weight
-│          └─[user]
-│              ├─logs
-│              └─xception
-│                  └─logs
-└─tfrecords
-     └─[user]
-         └─[image]
+/
+└─content
+    ├─drive
+    │  └─My Drive
+    │      ├─Image
+    │      │  └─[category]
+    │      ├─scored_param
+    │      │  └─[user]
+    │      │      └─[image]
+    │      └─weight
+    │          └─[user]
+    │              ├─logs
+    │              └─xception
+    │                  └─logs
+    └─tfrecords
+        └─[user]
+            └─[image]
 ```
