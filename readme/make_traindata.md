@@ -17,3 +17,21 @@
 * `-i`、`--image_name`：画像名
 * `-u`、`--user_name`：ユーザ名
 
+## ディレクトリ構成
+```
+content
+├─drive
+│  └─My Drive
+│      ├─Image
+│      ├─scored_param
+│      │  └─[user]
+│      │      └─[image]
+│      └─weight
+│          └─[user]
+│              ├─logs
+│              └─xception
+│                  └─logs
+└─tfrecords
+     └─[user]
+         └─[image]
+```
