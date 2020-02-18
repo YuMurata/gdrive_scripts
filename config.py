@@ -17,6 +17,7 @@ class DirectoryPath:
 
 
 class ImagePath:
-    image_path_dict = {image_name: str(DirectoryPath.image / f'{image_name}.jpg')
-                       for image_name in ['salad', 'katsudon', 'farm',
-                                          'flower', 'waterfall']}
+    image_path_dict = \
+        {image_name: str(DirectoryPath.image / f'{image_name}.jpg')
+         for image_name in ['salad', 'katsudon', 'farm',
+                            'flower', 'waterfall']}
