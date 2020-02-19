@@ -65,6 +65,9 @@ if __name__ == "__main__":
         if is_valid_exists:
             print(f'{str(valid_path)} is already exist')
 
+        scored_param_num = len(list(scored_param_dir_path.iterdir()))
+        generate_per_param = args.generate_num//scored_param_num
+
         for scored_param_path in scored_param_dir_path.iterdir():
             with open(str(scored_param_path), 'r') as fp:
                 scored_param = json.load(fp)
@@ -90,14 +93,14 @@ if __name__ == "__main__":
             if not is_train_exists:
                 TrainDataMaker.make_tfrecords(
                     train_writer,
-                    args.generate_num,
+                    generate_per_param,
                     EnhanceParamGenerator(),
                     enhancer, evaluator)
 
             if not is_valid_exists:
                 TrainDataMaker.make_tfrecords(
                     valid_writer,
-                    args.generate_num // 10, EnhanceParamGenerator(),
+                    generate_per_param // 10, EnhanceParamGenerator(),
                     enhancer, evaluator)
 
     except FileNotFoundError as e:
