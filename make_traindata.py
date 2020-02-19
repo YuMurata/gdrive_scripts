@@ -60,8 +60,8 @@ if __name__ == "__main__":
             print(f'{str(train_path)} is already exist')
 
         valid_path = tfrecords_dir_path / 'validation.tfrecords'
-        valid_writer = TrainDataMaker.Writer(str(valid_path))
         is_valid_exists = valid_path.exists()
+        valid_writer = TrainDataMaker.Writer(str(valid_path))
         if is_valid_exists:
             print(f'{str(valid_path)} is already exist')
 
