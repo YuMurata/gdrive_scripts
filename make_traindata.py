@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
             image_path_candidate = \
                 [image_path for image_path in image_dir_path.iterdir()
-                 if image_path.stem == scored_param.stem]
+                 if image_path.stem == scored_param_path.stem]
             if len(image_path_candidate) != 1:
                 raise Exception(f'{scored_param_path.stem} is multiple exists')
             image_path = str(image_path_candidate[0])
