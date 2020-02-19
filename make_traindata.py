@@ -55,12 +55,12 @@ if __name__ == "__main__":
 
         train_path = tfrecords_dir_path / 'train.tfrecords'
         is_train_exists = train_path.exists()
-        train_writer = TrainDataMaker.Writer(train_path)
+        train_writer = TrainDataMaker.Writer(str(train_path))
         if is_train_exists:
             print(f'{str(train_path)} is already exist')
 
         valid_path = tfrecords_dir_path / 'validation.tfrecords'
-        valid_writer = TrainDataMaker.Writer(valid_path)
+        valid_writer = TrainDataMaker.Writer(str(valid_path))
         is_valid_exists = valid_path.exists()
         if is_valid_exists:
             print(f'{str(valid_path)} is already exist')
